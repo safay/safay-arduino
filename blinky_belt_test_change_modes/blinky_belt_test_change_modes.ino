@@ -39,8 +39,11 @@ const uint8_t PROGMEM gamma8[] = {
   215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255 };
 
 // Initialize potentiometer
-#define POTPIN 2    // select the input pin for the potentiometer
-int val = 0;       // variable to store the value coming from the sensor
+#define POTPINA 2    // select the input pin for the potentiometer
+#define POTPINB 3
+// variables to store the value coming from the sensor
+int valA = 0;
+int valB = 0;
 
 // The rotary switch has eight pins; they are attached to the eight Arduino digital pins defined here  
 int pinA = 3;
@@ -60,6 +63,10 @@ struct rgb
   int green;
   int blue;
 };
+
+bool greenup = true;
+bool redup = true;
+bool blueup = true;
 
 struct rgb rgbArray[NUMPIXELS];
 
@@ -111,15 +118,15 @@ void loop()
 {
   if (digitalRead(pinA) == LOW)
   {
-    val = analogRead(POTPIN) / 5 + 0.1;    // read the value from the sensor
-    Serial.println(val);
+    valA = analogRead(POTPINA) / 5 + 0.1;    // read the value from the sensor
+    Serial.println(valA);
     i = random(NUMPIXELS);
     blue = random(77) + 20;
     green = random(77) + 20;
     red = random(77) + 20;
     strip.setPixelColor(i, pgm_read_byte(&gamma8[red]), pgm_read_byte(&gamma8[green]), pgm_read_byte(&gamma8[blue])); 
     strip.show();                     // Refresh strip
-    delay(val);                        // Pause
+    delay(valA);                        // Pause
     Serial.println("A");
   }
   
@@ -139,7 +146,7 @@ void loop()
   
   else if (digitalRead(pinC) == LOW)
   {
-    val = analogRead(POTPIN) / 5 + 0.1;    // read the value from the sensor
+    valA = analogRead(POTPINA) / 5 + 0.1;    // read the value from the sensor
     // set first pixel to new value based on value of pixel at index = 1
     if (rgbArray[1].red < 200)
     {
@@ -173,13 +180,13 @@ void loop()
       rgbArray[i].green = rgbArray[i - 1].green;
       rgbArray[i].blue = rgbArray[i - 1].blue;
     };
-    delay(val);
+    delay(valA);
     Serial.println("C");
   }
 
   else if (digitalRead(pinD) == LOW)
   {
-    val = analogRead(POTPIN) / 5 + 0.1;    // read the value from the sensor
+    valA = analogRead(POTPINA) / 5 + 0.1;    // read the value from the sensor
     // set first pixel to new value based on value of pixel at index = 1
     if (rgbArray[1].green < 200)
     {
@@ -213,33 +220,198 @@ void loop()
       rgbArray[i].green = rgbArray[i - 1].green;
       rgbArray[i].blue = rgbArray[i - 1].blue;
     };
-    delay(val);
+    delay(valA);
     Serial.println("D");
   }
+  
   else if (digitalRead(pinE) == LOW)
   {
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(50);
+    valA = analogRead(POTPINA) / 5 + 0.1;    // read the value from the sensor
+    // set first pixel to new value based on value of pixel at index = 1
+    if (rgbArray[1].green < 197 && greenup)
+    {
+      rgbArray[0].green = rgbArray[1].green + 1;
+    }
+    else if (rgbArray[1].green > 35 && !greenup)
+    {
+      rgbArray[0].green = rgbArray[1].green - 1;
+    }
+    else
+    {
+      greenup = !greenup;
+    }
+
+    if (rgbArray[1].blue < 201 && blueup)
+    {
+      rgbArray[0].blue = rgbArray[1].blue + 1;
+    }
+    else if (rgbArray[1].blue > 35 && !blueup)
+    {
+      rgbArray[0].blue = rgbArray[1].blue - 1;
+    }
+    else
+    {
+      blueup = !blueup;
+    }
+
+    // set pixels to rgbArray
+    for (int i=0; i <= NUMPIXELS; i++){      
+      strip.setPixelColor(i, pgm_read_byte(&gamma8[rgbArray[i].red]), pgm_read_byte(&gamma8[rgbArray[i].green]), pgm_read_byte(&gamma8[rgbArray[i].blue]));
+    };
+
+    // show
+    strip.show();
+    
+    // increment rgbArray
+    for (int i=NUMPIXELS; i > 0; i--){      
+      rgbArray[i].red = rgbArray[i - 1].red;
+      rgbArray[i].green = rgbArray[i - 1].green;
+      rgbArray[i].blue = rgbArray[i - 1].blue;
+    };
+    delay(valA);
     Serial.println("E");
   }
+  
   else if (digitalRead(pinF) == LOW)
   {
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(50);
-    Serial.println("F");
+    valA = analogRead(POTPINA) / 5 + 1;    // read the value from the sensor
+    valB = analogRead(POTPINB) / 5 + 40;    // read the value from the sensor
+    // set first pixel to new value based on value of pixel at index = 1
+    if (rgbArray[1].green < 197 && greenup)
+    {
+      rgbArray[0].green = rgbArray[1].green + 1;
+    }
+    else if (rgbArray[1].green > 35 && !greenup)
+    {
+      rgbArray[0].green = rgbArray[1].green - 1;
+    }
+    else
+    {
+      greenup = !greenup;
+    }
+
+    if (rgbArray[1].blue < 203 && blueup)
+    {
+      rgbArray[0].blue = rgbArray[1].blue + 1;
+    }
+    else if (rgbArray[1].blue > 35 && !blueup)
+    {
+      rgbArray[0].blue = rgbArray[1].blue - 1;
+    }
+    else
+    {
+      blueup = !blueup;
+    }
+
+    if (rgbArray[1].red < 131 && redup)
+    {
+      rgbArray[0].red = rgbArray[1].red + 1;
+    }
+    else if (rgbArray[1].red > 35 && !redup)
+    {
+      rgbArray[0].red = rgbArray[1].red - 1;
+    }
+    else
+    {
+      redup = !redup;
+    }
+
+    // set pixels to rgbArray
+    for (int i=0; i <= NUMPIXELS; i++){      
+      strip.setPixelColor(i, pgm_read_byte(&gamma8[rgbArray[i].red]), pgm_read_byte(&gamma8[rgbArray[i].green]), pgm_read_byte(&gamma8[rgbArray[i].blue]));
+    };
+
+    // show
+    strip.show();
+    
+    // increment rgbArray
+    for (int i=NUMPIXELS; i > 0; i--){      
+      rgbArray[i].red = rgbArray[i - 1].red;
+      rgbArray[i].green = rgbArray[i - 1].green;
+      rgbArray[i].blue = rgbArray[i - 1].blue;
+    };
+    delay(valA);
+    Serial.print("F");
+    Serial.print(valA);
+    Serial.print("-");
+    Serial.print(valB);
+    Serial.println();
   }
+  
   else if (digitalRead(pinG) == LOW)
   {
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(50);
-    Serial.println("G");
+    valA = analogRead(POTPINA) / 5 + 1;    // read the value from the sensor
+    valB = analogRead(POTPINB) / 5 + 40;    // read the value from the sensor
+    // set first pixel to new value based on value of pixel at index = 1
+    if (rgbArray[1].green < valB + 21 && greenup)
+    {
+      rgbArray[0].green = rgbArray[1].green + 1;
+    }
+    else if (rgbArray[1].green > 35 && !greenup)
+    {
+      rgbArray[0].green = rgbArray[1].green - 1;
+    }
+    else
+    {
+      greenup = !greenup;
+    }
+
+    if (rgbArray[1].blue < valB + 1 && blueup)
+    {
+      rgbArray[0].blue = rgbArray[1].blue + 1;
+    }
+    else if (rgbArray[1].blue > 2 && !blueup)
+    {
+      rgbArray[0].blue = rgbArray[1].blue - 1;
+    }
+    else
+    {
+      blueup = !blueup;
+    }
+
+    if (rgbArray[1].red < valB + 17 && redup)
+    {
+      rgbArray[0].red = rgbArray[1].red + 1;
+    }
+    else if (rgbArray[1].red > 35 && !redup)
+    {
+      rgbArray[0].red = rgbArray[1].red - 1;
+    }
+    else
+    {
+      redup = !redup;
+    }
+
+    // set pixels to rgbArray
+    for (int i=0; i <= NUMPIXELS; i++){      
+      strip.setPixelColor(i, pgm_read_byte(&gamma8[rgbArray[i].red]), pgm_read_byte(&gamma8[rgbArray[i].green]), pgm_read_byte(&gamma8[rgbArray[i].blue]));
+    };
+
+    // show
+    strip.show();
+    
+    // increment rgbArray
+    for (int i=NUMPIXELS; i > 0; i--){      
+      rgbArray[i].red = rgbArray[i - 1].red;
+      rgbArray[i].green = rgbArray[i - 1].green;
+      rgbArray[i].blue = rgbArray[i - 1].blue;
+    };
+    delay(valA);
+    Serial.print("G");
+    Serial.print(valA);
+    Serial.print("-");
+    Serial.print(valB);
+    Serial.println();
   }
+  
   else if (digitalRead(pinH) == LOW)
   {
     digitalWrite(LED_BUILTIN, HIGH);
     delay(50);
     Serial.println("H");
-  }  else
+  }  
+  
+  else
   {
     digitalWrite(LED_BUILTIN, LOW);
     Serial.println("none");
